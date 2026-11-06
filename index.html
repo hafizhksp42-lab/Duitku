@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f7fb" />
+    <meta
+      name="description"
+      content="DuitKu membantu mencatat transaksi, mengatur anggaran, dan mencapai target keuangan."
+    />
+    <title>DuitKu — Keuangan Pribadi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navigasi utama">
+        <a class="brand" href="#" data-page-link="dashboard" aria-label="DuitKu beranda">
+          <span class="brand-mark" aria-hidden="true">D</span>
+          <span>Duit<span class="brand-accent">Ku</span><small>PERSONAL FINANCE</small></span>
+        </a>
+
+        <p class="nav-label">MENU</p>
+        <nav class="main-nav">
+          <button class="nav-item active" type="button" data-page-link="dashboard">
+            <span class="nav-icon" aria-hidden="true">⌂</span>Dashboard
+          </button>
+          <button class="nav-item" type="button" data-page-link="transactions">
+            <span class="nav-icon" aria-hidden="true">↔</span>Transaksi
+          </button>
+          <button class="nav-item" type="button" data-page-link="budgets">
+            <span class="nav-icon" aria-hidden="true">▤</span>Anggaran
+          </button>
+          <button class="nav-item" type="button" data-page-link="goals">
+            <span class="nav-icon" aria-hidden="true">◎</span>Target tabungan
+          </button>
+          <button class="nav-item" type="button" data-page-link="reports">
+            <span class="nav-icon" aria-hidden="true">▥</span>Laporan
+          </button>
+          <button class="nav-item" type="button" data-page-link="settings">
+            <span class="nav-icon" aria-hidden="true">⚙</span>Pengaturan
+          </button>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="sidebar-tip">
+            <span class="tip-icon" aria-hidden="true">✦</span>
+            <strong>Selangkah lebih dekat</strong>
+            <p>Kebiasaan kecil hari ini membangun masa depan finansialmu.</p>
+          </div>
+          <div class="sidebar-foot">DuitKu v1.0 <span>•</span> Data tersimpan di perangkat</div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="today-label"></p>
+            <h1 id="page-title">Dashboard</h1>
+          </div>
+          <button class="button button-primary top-add-button" type="button" data-action="new-transaction">
+            <span aria-hidden="true">＋</span> Tambah transaksi
+          </button>
+        </header>
+
+        <div id="app-notice" class="notice" role="status" hidden></div>
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+        <section class="page-section active" id="page-dashboard" aria-labelledby="page-title">
+          <div class="welcome-row">
+            <div>
+              <h2>Ringkasan keuangan</h2>
+              <p>Pantau kondisi keuanganmu dalam satu tampilan.</p>
+            </div>
+            <label class="month-picker compact-picker">
+              <span>Bulan</span>
+              <input id="dashboard-month" type="month" />
+            </label>
+          </div>
+
+          <div class="metric-grid">
+            <article class="metric-card balance-metric">
+              <div class="metric-top"><span>Total saldo</span><span class="metric-symbol">Rp</span></div>
+              <strong id="metric-balance">Rp0</strong>
+              <p>Akumulasi seluruh transaksi</p>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span>Pemasukan bulan ini</span><span class="metric-icon income-icon">↙</span></div>
+              <strong id="metric-income">Rp0</strong>
+              <p id="metric-income-caption">Transaksi pemasukan</p>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span>Pengeluaran bulan ini</span><span class="metric-icon expense-icon">↗</span></div>
+              <strong id="metric-expense">Rp0</strong>
+              <p id="metric-expense-caption">Transaksi pengeluaran</p>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span>Transaksi</span><span class="metric-icon count-icon">#</span></div>
+              <strong id="metric-count">0</strong>
+              <p id="metric-count-caption">Pada bulan ini</p>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span>Selisih bulan ini</span><span class="metric-icon count-icon">±</span></div>
+              <strong id="metric-net">Rp0</strong>
+              <p>Pemasukan dikurangi pengeluaran</p>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="panel chart-panel">
+              <div class="panel-heading">
+                <div><h3>Arus kas</h3><p>Pemasukan dan pengeluaran per bulan</p></div>
+                <span class="chart-legend"><i class="legend-dot income-dot"></i>Pemasukan <i class="legend-dot expense-dot"></i>Pengeluaran</span>
+              </div>
+              <div class="chart-wrap"><canvas id="cashflow-chart" aria-label="Grafik pemasukan dan pengeluaran"></canvas></div>
+              <p class="chart-fallback" id="cashflow-fallback" hidden>Grafik tersedia saat terhubung ke internet (Chart.js CDN).</p>
+            </article>
+            <article class="panel chart-panel category-panel">
+              <div class="panel-heading"><div><h3>Pengeluaran per kategori</h3><p>Bulan yang dipilih</p></div></div>
+              <div class="chart-wrap doughnut-wrap"><canvas id="category-chart" aria-label="Grafik pengeluaran berdasarkan kategori"></canvas></div>
+              <p class="chart-fallback" id="category-fallback" hidden>Grafik tersedia saat terhubung ke internet (Chart.js CDN).</p>
+              <div id="category-legend" class="category-legend"></div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-heading">
+              <div><h3>Transaksi terbaru</h3><p>Aktivitas keuangan terakhirmu</p></div>
+              <button class="text-button" type="button" data-page-link="transactions">Lihat semua <span aria-hidden="true">→</span></button>
+            </div>
+            <div id="recent-transactions" class="transaction-table-wrap"></div>
+          </article>
+        </section>
+
+        <section class="page-section" id="page-transactions">
+          <div class="section-intro">
+            <div><h2>Semua transaksi</h2><p>Catat dan kelola pemasukan serta pengeluaranmu.</p></div>
+            <button class="button button-primary" type="button" data-action="new-transaction">＋ Transaksi baru</button>
+          </div>
+
+          <article class="panel form-panel" id="transaction-editor-panel" hidden>
+            <div class="panel-heading"><div><h3 id="transaction-form-title">Tambah transaksi</h3><p>Lengkapi detail transaksi di bawah ini.</p></div>
+              <button class="icon-button" type="button" data-action="cancel-edit" aria-label="Tutup form">×</button>
+            </div>
+            <form id="transaction-form" class="form-grid">
+              <input id="transaction-id" type="hidden" />
+              <label class="field field-wide">Nama transaksi
+                <input id="transaction-description" type="text" maxlength="80" placeholder="Contoh: Belanja bulanan" required />
+              </label>
+              <label class="field">Jenis transaksi
+                <select id="transaction-type" required>
+                  <option value="expense">Pengeluaran</option>
+                  <option value="income">Pemasukan</option>
+                </select>
+              </label>
+              <label class="field">Kategori
+                <select id="transaction-category" required></select>
+              </label>
+              <label class="field">Nominal (Rp)
+                <input id="transaction-amount" type="number" min="1" step="1" inputmode="numeric" placeholder="0" required />
+              </label>
+              <label class="field">Tanggal
+                <input id="transaction-date" type="date" required />
+              </label>
+              <label class="field field-wide">Catatan <span class="optional">(opsional)</span>
+                <textarea id="transaction-note" rows="2" maxlength="240" placeholder="Tambahkan catatan jika diperlukan"></textarea>
+              </label>
+              <div class="form-actions field-wide">
+                <button class="button button-secondary" type="button" data-action="cancel-edit">Batal</button>
+                <button class="button button-primary" id="transaction-submit" type="submit">Simpan transaksi</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="panel">
+            <div class="filter-bar">
+              <label class="search-field"><span aria-hidden="true">⌕</span><input id="filter-search" type="search" aria-label="Cari nama transaksi" placeholder="Cari transaksi..." /></label>
+              <select id="filter-type" aria-label="Filter jenis"><option value="all">Semua jenis</option><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select>
+              <select id="filter-category" aria-label="Filter kategori"><option value="all">Semua kategori</option></select>
+              <input id="filter-month" type="month" aria-label="Filter bulan" />
+              <select id="filter-sort" aria-label="Urutkan transaksi"><option value="newest">Terbaru</option><option value="oldest">Terlama</option></select>
+            </div>
+            <div id="transactions-table" class="transaction-table-wrap"></div>
+          </article>
+        </section>
+
+        <section class="page-section" id="page-budgets">
+          <div class="section-intro">
+            <div><h2>Anggaran bulanan</h2><p>Tetapkan batas pengeluaran dan jaga rencana keuanganmu.</p></div>
+            <label class="month-picker"><span>Periode anggaran</span><input id="budget-month" type="month" /></label>
+          </div>
+          <div class="budget-summary-grid">
+            <article class="panel budget-total-card"><div class="panel-heading"><div><h3>Anggaran keseluruhan</h3><p id="budget-period-label"></p></div><span class="budget-icon">▤</span></div>
+              <form id="overall-budget-form" class="inline-form">
+                <label class="sr-only" for="overall-budget-limit">Batas anggaran keseluruhan</label>
+                <input id="overall-budget-limit" type="number" min="1" step="1" placeholder="Masukkan batas anggaran (Rp)" required />
+                <button class="button button-primary" type="submit">Simpan batas</button>
+              </form>
+              <div id="overall-budget-progress"></div>
+            </article>
+            <article class="panel category-budget-card"><div class="panel-heading"><div><h3>Anggaran per kategori</h3><p>Atur batas untuk kategori pengeluaran</p></div></div>
+              <form id="category-budget-form" class="form-grid compact-form">
+                <label class="field">Kategori<select id="budget-category" required></select></label>
+                <label class="field">Batas (Rp)<input id="category-budget-limit" type="number" min="1" step="1" placeholder="0" required /></label>
+                <button class="button button-primary field-wide" type="submit">Simpan anggaran kategori</button>
+              </form>
+              <div id="category-budget-list" class="budget-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page-section" id="page-goals">
+          <div class="section-intro">
+            <div><h2>Target tabungan</h2><p>Ubah rencana masa depan menjadi langkah yang bisa dicapai.</p></div>
+          </div>
+          <article class="panel form-panel">
+            <div class="panel-heading"><div><h3>Buat target baru</h3><p>Tentukan tujuan dan nominal tabunganmu.</p></div></div>
+            <form id="goal-form" class="form-grid">
+              <label class="field field-wide">Nama target<input id="goal-name" type="text" maxlength="70" placeholder="Contoh: Dana liburan" required /></label>
+              <label class="field">Nominal target (Rp)<input id="goal-target" type="number" min="1" step="1" placeholder="0" required /></label>
+              <label class="field">Tanggal target <span class="optional">(opsional)</span><input id="goal-date" type="date" /></label>
+              <div class="form-actions field-wide"><button class="button button-primary" type="submit">＋ Buat target</button></div>
+            </form>
+          </article>
+          <div id="goals-list" class="goals-grid"></div>
+        </section>
+
+        <section class="page-section" id="page-reports">
+          <div class="section-intro">
+            <div><h2>Laporan keuangan</h2><p>Pahami pola keuanganmu dan ambil keputusan lebih baik.</p></div>
+            <div class="report-actions"><button class="button button-secondary" type="button" data-action="export-csv">↓ Ekspor CSV</button><button class="button button-primary" type="button" data-action="print-report">Cetak laporan</button></div>
+          </div>
+          <article class="panel">
+            <div class="report-period-row">
+              <div><h3>Ringkasan bulanan</h3><p>Pilih periode untuk melihat detail laporan.</p></div>
+              <label class="month-picker"><span>Bulan laporan</span><input id="report-month" type="month" /></label>
+            </div>
+            <div class="report-metrics">
+              <div><span>Pemasukan</span><strong id="report-income">Rp0</strong></div>
+              <div><span>Pengeluaran</span><strong id="report-expense">Rp0</strong></div>
+              <div><span>Selisih</span><strong id="report-net">Rp0</strong></div>
+              <div><span>Pengeluaran terbesar</span><strong id="report-top-category">—</strong></div>
+            </div>
+          </article>
+          <article class="panel chart-panel report-chart-panel">
+            <div class="panel-heading"><div><h3>Tren keuangan</h3><p>Perbandingan pemasukan dan pengeluaran enam bulan terakhir.</p></div></div>
+            <div class="chart-wrap"><canvas id="report-chart" aria-label="Grafik tren keuangan enam bulan terakhir"></canvas></div>
+            <p class="chart-fallback" id="report-fallback" hidden>Grafik tersedia saat terhubung ke internet (Chart.js CDN).</p>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><h3>Rincian bulanan</h3><p>Rekapitulasi transaksi berdasarkan bulan.</p></div></div>
+            <div id="monthly-report-table" class="transaction-table-wrap"></div>
+          </article>
+        </section>
+
+        <section class="page-section" id="page-settings">
+          <div class="section-intro"><div><h2>Pengaturan</h2><p>Atur tampilan dan kelola salinan data DuitKu.</p></div></div>
+          <div class="settings-grid">
+            <article class="panel settings-card"><div class="panel-heading"><div><h3>Tampilan</h3><p>Sesuaikan kenyamanan aplikasi.</p></div></div>
+              <div class="setting-row"><div><strong>Tema aplikasi</strong><span>Pilih tampilan terang atau gelap</span></div>
+                <select id="theme-select" aria-label="Tema aplikasi"><option value="light">Terang</option><option value="dark">Gelap</option></select>
+              </div>
+              <div class="setting-row"><div><strong>Mata uang</strong><span>Format nominal yang digunakan</span></div><span class="setting-value">Rupiah (IDR)</span></div>
+            </article>
+            <article class="panel settings-card"><div class="panel-heading"><div><h3>Backup dan pemulihan</h3><p>Data DuitKu tersimpan di browser pada perangkat ini.</p></div></div>
+              <div class="backup-actions"><button class="button button-secondary" type="button" data-action="export-json">↓ Unduh backup JSON</button>
+                <label class="button button-secondary file-button">↑ Impor backup JSON<input id="import-file" type="file" accept="application/json,.json" /></label></div>
+            </article>
+            <article class="panel settings-card danger-card"><div class="panel-heading"><div><h3>Hapus seluruh data</h3><p>Penghapusan tidak dapat dibatalkan. Ekspor backup sebelum melanjutkan.</p></div></div>
+              <button class="button button-danger" type="button" data-action="clear-data">Hapus semua data</button>
+            </article>
+            <article class="panel settings-card"><div class="panel-heading"><div><h3>Tentang DuitKu</h3><p>Manajemen keuangan pribadi yang sederhana dan privat.</p></div></div>
+              <div class="about-row"><span>Versi aplikasi</span><strong>1.0.0</strong></div>
+              <div class="about-row"><span>Penyimpanan</span><strong>Local Storage browser</strong></div>
+              <div class="about-row"><span>Grafik</span><strong>Chart.js 4.4.7</strong></div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+    <dialog id="goal-amount-dialog" class="modal-dialog" aria-labelledby="goal-amount-title">
+      <form id="goal-amount-form" class="modal-content">
+        <div class="panel-heading">
+          <div><h3 id="goal-amount-title">Tambah dana</h3><p id="goal-amount-description"></p></div>
+          <button class="icon-button" type="button" data-action="close-goal-dialog" aria-label="Tutup dialog">×</button>
+        </div>
+        <input id="goal-amount-id" type="hidden" />
+        <input id="goal-amount-direction" type="hidden" />
+        <label class="field">Nominal (Rp)
+          <input id="goal-amount-value" type="number" min="1" step="1" inputmode="numeric" placeholder="0" required />
+        </label>
+        <div class="form-actions">
+          <button class="button button-secondary" type="button" data-action="close-goal-dialog">Batal</button>
+          <button class="button button-primary" type="submit">Simpan</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
